@@ -60,21 +60,38 @@
         wsClient.close();
       }
 
-      // TODO: Create a new WebSocket connection with the server using the ws protocol
-      const URL = '??://localhost:' + PORT;
+      // Create a new WebSocket connection with the server using the ws protocol
+      const URL = 'ws://localhost:' + PORT;
 
+      wsClient.onopen = (event) => {
+        wsClient.send(JSON.stringify({
+          type: 'NEW_USER'
+        }));
+      };
 
-      // TODO: Define the .onopen() handler
-        // TODO: Send the server a 'NEW_USER' message
+      wsClient.onmessage = (messageEvent) => {
+        const {type, payload} = JSON.parse(messageEvent.data);
+        switch (type) {
+          case 'GAME_FULL':
+            updateDisplay(displayText);
+            break;
+          case 'PLAYER_ASSIGNMENT':
+            setPlayerIndex(playerIndex);
+            break;
+          case 'COUNTDOWN':
+            countDown(clockValue);
+            break;
+          case 'NEW_POTATO_HOLDER':
+            updateCurrentPotatoHolder(newPotatoHolderIndex);
+            break;
+          case 'GAME_OVER':
+            endGame();
+            break;
+          default:
+            endGame();
+        }
 
-      // TODO: Define the .onmessage() handler
-        // For each message type below, call the appropriate helper the proper value
-          // 'GAME_FULL' => updateDisplay(displayText);
-          // 'PLAYER_ASSIGNMENT' => setPlayerIndex(playerIndex)
-          // 'COUNTDOWN' => countDown(clockValue)
-          // 'NEW_POTATO_HOLDER' => updateCurrentPotatoHolder(newPotatoHolderIndex)
-          // 'GAME_OVER' => endGame()
-      
+      }
 
       // .onclose is executed when the socket connection is closed
       wsClient.onclose = function() {
@@ -95,8 +112,8 @@
       // set the potatoHolderIndex to be the player that was clicked on
       potatoHolderIndex = newPotatoHolderIndex;
       
-      // TODO: Send the server a 'PASS_POTATO' message with the newPotatoHolderIndex
-      
+      // Send the server a 'PASS_POTATO' message with the newPotatoHolderIndex
+      wsClient.send(JSON.stringify('PASS_POTATO'));
     }
 
     ////////////////////////////////////////////////
