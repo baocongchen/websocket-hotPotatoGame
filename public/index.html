@@ -62,33 +62,34 @@
 
       // Create a new WebSocket connection with the server using the ws protocol
       const URL = 'ws://localhost:' + PORT;
-
+      wsClient = new WebSocket(URL);
       wsClient.onopen = (event) => {
         wsClient.send(JSON.stringify({
-          type: 'NEW_USER'
+          type: CLIENT.MESSAGE.NEW_USER
         }));
       };
 
       wsClient.onmessage = (messageEvent) => {
         const {type, payload} = JSON.parse(messageEvent.data);
         switch (type) {
-          case 'GAME_FULL':
-            updateDisplay(displayText);
+          case SERVER.MESSAGE.GAME_FULL:
+            updateDisplay('The game is full');
             break;
-          case 'PLAYER_ASSIGNMENT':
-            setPlayerIndex(playerIndex);
+          case SERVER.MESSAGE.PLAYER_ASSIGNMENT:
+            setPlayerIndex(payload.clientPlayerIndex);
             break;
-          case 'COUNTDOWN':
-            countDown(clockValue);
+          case SERVER.BROADCAST.COUNTDOWN:
+            countDown(payload.clockValue);
             break;
-          case 'NEW_POTATO_HOLDER':
-            updateCurrentPotatoHolder(newPotatoHolderIndex);
+          case SERVER.BROADCAST.NEW_POTATO_HOLDER:
+            updateCurrentPotatoHolder(payload.newPotatoHolderIndex);
             break;
-          case 'GAME_OVER':
+          case SERVER.BROADCAST.GAME_OVER:
             endGame();
             break;
           default:
             endGame();
+            break;
         }
 
       }
@@ -113,7 +114,10 @@
       potatoHolderIndex = newPotatoHolderIndex;
       
       // Send the server a 'PASS_POTATO' message with the newPotatoHolderIndex
-      wsClient.send(JSON.stringify('PASS_POTATO'));
+      wsClient.send(JSON.stringify({
+        type: CLIENT.MESSAGE.PASS_POTATO,
+        payload: { newPotatoHolderIndex }
+      }));
     }
 
     ////////////////////////////////////////////////

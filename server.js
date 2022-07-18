@@ -43,7 +43,7 @@ const wsServer = new WebSocket.Server({ server });
 // Define the websocket server 'connection' handler
 wsServer.on("connection", (socket) => {
   socket.on("message", (data) => {
-    const { type, payload } = data;
+    const { type, payload } = JSON.parse(data);
     switch (type) {
       case CLIENT.MESSAGE.NEW_USER:
         handleNewUser(socket);
@@ -77,9 +77,10 @@ function handleNewUser(socket) {
   if (nextPlayerIndex < 4) {
     // Send PLAYER_ASSIGNMENT to the socket with a clientPlayerIndex
     const message = {
-      type: SERVER.PLAYER_ASSIGNMENT,
+      type: SERVER.MESSAGE.PLAYER_ASSIGNMENT,
       payload: { clientPlayerIndex: nextPlayerIndex },
     };
+    socket.send(JSON.stringify(message));
     // Then, increment the number of players in the game
     nextPlayerIndex++;
 
@@ -100,7 +101,7 @@ function handleNewUser(socket) {
     const message = {
       type: SERVER.MESSAGE.GAME_FULL,
     };
-    socket.send(message);
+    socket.send(JSON.stringify(message));
   }
 }
 
